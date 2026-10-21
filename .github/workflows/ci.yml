@@ -46,3 +46,4 @@ jobs:
               --tag "${{ steps.login-ecr.outputs.registry }}/demo:${{ github.sha }}" .
             docker push \
               "${{ steps.login-ecr.outputs.registry }}/demo:${{ github.sha }}"
+
