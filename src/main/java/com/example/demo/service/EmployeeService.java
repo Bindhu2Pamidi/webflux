@@ -3,33 +3,29 @@ package com.example.demo.service;
 import com.example.demo.entity.EmployeeEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-
-import java.util.List;
 
 @Service
 public class EmployeeService {
 
-    private final DynamoDbTable<EmployeeEntity> employeeTable;
+    private final DynamoDbAsyncTable<EmployeeEntity> employeeTable;
 
-    public EmployeeService(
-            DynamoDbEnhancedClient enhancedClient,
-            @Value("${aws.dynamodb.table}") String tableName) {
-        this.employeeTable =
-                enhancedClient.table(tableName, TableSchema.fromBean(EmployeeEntity.class));
+    public EmployeeService(DynamoDbEnhancedAsyncClient enhancedClient, @Value("${aws.dynamodb.table}") String tableName) {
+        this.employeeTable = enhancedClient.table(tableName, TableSchema.fromBean(EmployeeEntity.class));
     }
 
-    public EmployeeEntity createEmployee(EmployeeEntity employee) {
-        employeeTable.putItem(employee);
-        return employee;
+    public Mono<EmployeeEntity> createEmployee(EmployeeEntity employee) {
+        return Mono.fromFuture(() -> employeeTable.putItem(employee))
+                .thenReturn(employee);
     }
 
-    public List<EmployeeEntity> getEmployee() {
-        return employeeTable.scan()
-                .items()
-                .stream()
-                .toList();
+    public Flux<EmployeeEntity> getEmployee() {
+        return Flux.defer(() ->
+                Flux.from(employeeTable.scan().items())
+        );
     }
 }
