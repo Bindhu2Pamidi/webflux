@@ -24,7 +24,7 @@ jobs:
           cache: maven
 
       - name: Build and test
-        run: ./mvnw --batch-mode --no-transfer-progress verify
+        run: ./mvnw
 
       - name: Configure AWS credentials
         if: github.event_name == 'push'
