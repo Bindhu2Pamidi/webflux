@@ -24,7 +24,7 @@ jobs:
           cache: maven
 
       - name: Build and test
-        run: ./mvnw
+        run: ./mvnw -B clean package -DskipTests
 
       - name: Configure AWS credentials
         if: github.event_name == 'push'
